@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %} Trip Management {% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/claims.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.0.5/css/dataTables.dataTables.css" />
+  <style>
+    .pac-container {
+      z-index: 1051 !important; 
+     }
+  </style>
+{% endblock %}
+
+{% block active_user %} 
+{{ active_user }}
+{% endblock %}
+
+{% block logout_button %}
+  {% include "system_management/includes/logout_button.html" %}
+{% endblock %}
+
+{% block content %}
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <i type="button" data-bs-dismiss="modal" aria-label="Close" class="bi bi-x-circle btn-close" id="CloseModal"></i>
+        </div>
+        <div class="modal-body background">
+          <div class="text-center justify-content-center align-items-center d-flex flex-column ">
+            <div class="container rounded_border">
+              <h2 class="column_padding">Trip Details</h2>
+              <h5 id="success" class="text-success"></h5>
+              <h5 id="fail"></h5>
+
+              <form id="claims_form" class="needs-validation header_padding mt-5" action="{% url 'claims' %}" method="POST" novalidate>
+                {% csrf_token %}
+                <label for="consultant_address" class="form-label"><h4>Consultant Location <span class="text-danger">*</span></h4></label>
+                <input type="text" class="form-control" id="consultant_address" name="consultant_address" required>
+                <div class="invalid-feedback">Please provide an origin</div>
+                <div class="form-check form-switch column_padding"></div>
+                <label for="client_address" class="form-label mt-4"><h4>Client Location <span class="text-danger">*</span></h4></label>
+                <input type="text" class="form-control" id="client_address" name="client_address" required>
+                <div class="invalid-feedback">Please provide a destination</div>
+                <label for="trip_count" class="form-label mt-5"><h4>Trip Count</h4></label>
+                <input type="number" class="form-control" id="trip_count" name="trip_count" value="1" min="1">
+                <label for="description" class="form-label mt-5"><h4>Description</h4></label>
+                <textarea class="form-control" id="trip_details" name="description" rows="1"></textarea>
+                <button type="submit" class="btn btn-outline-light mt-5" id="submit_btn">ADD TRIP</button> 
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="table-responsive container">
+    <div>
+        <!-- Button trigger modal -->
+      <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+        Add Claim
+      </button>
+    </div>
+    <table id="myTable" class="table table-striped table-striped-columns" style="width:100%">
+      <thead>
+          <tr>
+              <th>Date</th>
+              <th>Consultant Address</th>
+              <th>Client Address</th>
+              <th>Distance (km)</th>
+              <th>Count</th>
+              <th>Amount</th>
+              <th>Description</th>
+              <th></th>
+              <th></th>
+          </tr>
+      </thead>
+      <tbody></tbody> <!-- Add tbody tag -->
+  </table>
+  
+
+  </div>
+   <script src="{% url 'maps_api_proxy' %}?callback=initMap&libraries=places"></script>
+
+ 
+  <script src="{% static 'js/claims.js' %}"></script>
+  <script src="https://cdn.datatables.net/2.0.5/js/dataTables.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+  <script  type="text/javascript">
+    $(document).ready(function () {
+      var viewUrl = "{% url 'view_claims_by_id' 0 %}";
+      var previewUrl = "{% url 'claims_preview' 0 %}";
+
+      var table = $('#myTable').DataTable({  // Fixed variable declaration
+        "ajax": {
+          "url": "{% url 'get_claims_by_user' %}",
+          "type": "GET",
+          "dataSrc": "data"
+        },
+        "columns": [
+          { "data": "created",
+            "render": function (data, type, row) {
+              return moment(data).format('YYYY-MM-DD');
+            }
+          },
+          { "data": "consultant_address" },
+          { "data": "client_address" },
+          { "data": "total_distance" },
+          { "data": "trip_count" },
+          { "data": "amount" },
+          { "data": "description" },
+          {
+            "data": null,
+            "render": function (data, type, row) {
+              return '<button id="view-btn" type="button" class="btn view-btn" data-id="' + data.id + '" data-toggle="tooltip" title="View claim">' +
+                    '<i class="bi bi-binoculars-fill"></i>' +
+                    '</button>';
+            }
+          },
+          {
+            "data": null,
+            "render": function (data, type, row) {
+              return '<button id="delete-btn" type="button" class="btn delete-btn" data-id="' + data.id + '" data-toggle="tooltip" title="Delete claim">' +
+                    '<i class="bi bi-trash-fill text-danger"></i>' +
+                    '</button>';
+            }
+          }
+        ],
+        "order": [[0, "desc"]]
+      });
+
+      // Add event listener for view button
+      $('#myTable tbody').on('click', '#view-btn', function () {
+        var data = table.row($(this).parents('tr')).data();
+        var id = $(this).data('id');
+        var url = viewUrl.replace('0', id);
+        window.location.href = url;
+      });
+
+      $('#myTable tbody').on("click", "#delete-btn", function () {
+
+        var data = table.row($(this).parents('tr')).data();
+        var id = $(this).data('id');  // Get the ID of the claim to delete
+        var delete_url = "{% url 'delete_claim' 0 %}"
+        var url = delete_url.replace('0', id);
+
+        // Confirm the deletion with the user
+        if (confirm("Are you sure you want to delete this claim?")) {
+            $.ajax({
+                type: "POST",  // Use POST instead of DELETE for the request type
+                url: url,  // The URL for the delete claim action
+                data: {
+                    claim_id: id,  // Send the claim ID in the request data
+                    csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+                },
+                success: function(data){
+                    // Refresh the table or remove the row directly
+                    refreshDataTable();  // Optionally use: $('tr[data-id="' + id + '"]').remove();
+                    alert('Claim deleted successfully!');
+                },
+                error: function (xhr, status, error) {
+                    console.error('Deletion failed: ' + error);
+                    alert('Failed to delete the claim. Please try again.');
+                }
+          });
+        }
+      });
+
+
+        // Add event listener for preview button
+        $('#preview-btn').on('click', '#preview-btn', function () {
+          var url = previewUrl.replace('0', id);
+          window.location.href = url;
+        });
+
+      $(document).on("submit", "#claims_form", function (event) {
+        event.preventDefault();
+        $.ajax({
+          type: "POST",
+          url: "{% url 'claims' %}",
+          data: {
+            consultant_address: $("#consultant_address").val(),
+            client_address: $("#client_address").val(),
+            trip_count: $("#trip_count").val(),
+            description: $("#trip_details").val(),
+            csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+          },
+          success: function(data){
+            $("#success").html(data);
+            refreshDataTable();
+          },
+          error: function (xhr, status, error) {
+            $("#fail").html(data);
+            console.error('Submission failed: ' + error);
+          }
+        });
+      });
+
+      function refreshDataTable() {
+        table.ajax.reload(null, false); // Reload data without resetting current page
+      }
+    });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      var myModal = $('#staticBackdrop');
+      var form = document.getElementById('claims_form');
+      
+      // Store the original modal content
+      var originalModalContent = myModal.clone();
+  
+      myModal.on('hidden.bs.modal', function () {
+          resetModalContent();
+      });
+  
+      function resetModalContent() {
+          // Remove the current modal content
+          myModal.remove();
+
+          
+          // Append the original modal content
+          $('body').append(originalModalContent);
+  
+          // Re-initialize modal
+          myModal = $('#staticBackdrop');
+  
+          // Re-attach event listener for hiding modal
+          myModal.on('hidden.bs.modal', function () {
+              resetModalContent();
+          });
+  
+          // Re-initialize form
+          form = document.getElementById('claims_form');
+  
+          // Remove previous event listener
+          form.removeEventListener('submit', handleFormSubmit);
+  
+          // Add new event listener
+          form.addEventListener('submit', handleFormSubmit);
+  
+          // Remove previous validation state
+          form.classList.remove('was-validated');
+
+          // Reset form controls
+          form.reset();
+
+          // Reset the success/fail message after the modal is closed
+          document.getElementById('success').innerHTML = '';
+          document.getElementById('fail').innerHTML = '';
+ 
+          // Reinitialize Google Places Autocomplete
+          initializeGooglePlacesAutocomplete();
+      }
+      function resetForm() {
+        form.reset(); // Reset form fields
+        form.classList.remove('was-validated'); // Remove validation state
+        initializeGooglePlacesAutocomplete(); // Reinitialize Google Places Autocomplete
+      }
+  
+      function handleFormSubmit(event) {
+          if (!form.checkValidity()) {
+              event.preventDefault();
+              event.stopPropagation();
+          }
+  
+          form.classList.add('was-validated');
+
+      }
+  
+      // Add event listener for form submission
+      form.addEventListener('submit', handleFormSubmit);
+  
+      // Function to initialize Google Places Autocomplete
+      function initializeGooglePlacesAutocomplete() {
+          var consultantAutocomplete = new google.maps.places.Autocomplete(document.getElementById('consultant_address')); 
+          var clientAutocomplete = new google.maps.places.Autocomplete(document.getElementById('client_address'));
+      }
+  
+      // Call the function to initialize Google Places Autocomplete
+      initializeGooglePlacesAutocomplete();
+  });
+  </script>
+  
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% load static %} <!-- Load the static built-in plug-in -->
+
+{% block page_title %} Unauthorised {% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/claims.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="text-center justify-content-center align-items-center d-flex flex-column">
+    <div class="container background rounded_border column_padding">        
+        <h2 class="column_padding my-5">You're not authorized to view this page.</h2>
+        <a href="{% url 'index' %}">
+            <button type="button" class="btn btn-outline-dark my-3" id="login_btn">HOME PAGE</button>
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block page_title %}Login{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/claims.css' %}">
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center py-1">Your Reimbursement Partner</h1>
+<p class="text-center pb-5">Explore. Log. Claim.</p>
+    <div class="content-row py-2"> <!-- Flex container -->
+        <div class="image-container"> <!-- Flex item for image -->
+            <img src="{% static 'images/home_image.svg' %}" alt="Tourist with Map">
+        </div>
+        <div class="login-container"> <!-- Flex item for login -->
+            <div>
+                <img src="{% static 'images/logo.svg' %}" class="logo" alt="Calybre Logo">
+            </div>
+            <div>
+                <img src="{% static 'images/home_login_image.svg' %}" class="login-image" alt="Calybre Logo">
+            </div>
+            {% if request.identity_context_data.authenticated %}
+                <script>
+                    window.location.replace("{% url 'auth' %}");
+                </script>
+            {% else %}
+                <div class="pb-5">
+                    <a href="{% url 'sign_in' %}">
+                        <button type="button" class="btn btn-dark" id="login_btn">Login</button>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

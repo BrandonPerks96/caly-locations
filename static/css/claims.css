@@ -1,0 +1,186 @@
+.web_app_background {
+    background-color: #90c3c0;
+    opacity: 0.75;
+}
+
+.background {
+    background-color: #90c3c0;
+    opacity: 0.75;
+}
+.margins {
+    margin: 30px;
+}
+.title_margin {
+    margin-bottom: 50px;
+}
+.column_container {
+    margin-right: 20px;
+    flex: 1;
+}
+
+.logo {
+    width: 140px;
+    height: 160px;
+}
+
+.login-image {
+    width: 200px;
+    height: 200px;
+}
+
+.right_column {
+    flex: 2;
+}
+
+.rounded_border {
+    border-radius: 10px;
+}
+
+.header_shadow {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow to the header */
+}
+
+.header_padding {
+    padding: 30px;
+}
+
+
+.column_padding {
+    padding: 15px;
+}
+
+.middle {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    height: 70vh;
+}
+
+
+  .modal-header .btn-close {
+    border: none;
+    background: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: right;
+  }
+
+  .content-row {
+    display: flex;
+    justify-content: center; /* Centers the content horizontally */
+    align-items: center; /* Aligns items vertically */
+    height: 100%;
+    width: 100%;
+    flex-direction: row;
+}
+
+@media (max-width: 500px) {
+    
+    .image-container {
+        display: none !important;
+    }
+
+    .content-row {
+        flex-direction: column;
+        margin-bottom: 50px;
+    }
+
+    .content-row img {
+        max-width: 100%;
+        height: auto;
+        align-self: center;
+    }
+
+    .login-container #login_btn {
+        margin-top: 50px;
+    }
+}
+
+.image-container{
+    margin-right: 50px;
+    display: flex;
+
+}
+
+
+.login-container {
+    flex-direction: column; /* Stack the login items vertically */
+    background-color: #90c3c0;
+    opacity: 0.75;
+    width: 300px;
+    height: 450px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center; /* Center content horizontally inside each container */
+    align-items: center; /* Center content vertically inside each container */
+}
+
+.login-container > * {
+    margin-bottom: 15px; /* Adjust the margin-bottom as needed */
+}
+
+.preview-btn {
+    background-color: #9EC390;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.preview-btn:hover {
+    background-color: #7FAD7E;
+}
+
+.back-btn {
+    background-color: #C39090;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background-color: #AD7E7E;
+}
+
+.username {
+    font-weight: bold;
+    text-align: left;
+    padding-left: 30%;
+    padding-bottom: 30px;
+}
+
+.bi-trash-fill {
+    font-size: 1.5rem;
+}
+
+.bi-trash-fill:focus {
+    outline: none;
+}
+
+.delete-btn:hover {
+    transform: scale(1.2);
+}
+
+.delete-btn:focus {
+    outline: none;
+}
+
+.bi-binoculars-fill {
+    font-size: 1.5rem;
+}
+
+.bi-binoculars-fill:focus {
+    outline: none;
+}
+
+.view-btn:hover {
+    transform: scale(1.2);
+}
+
+.view-btn:focus {
+    outline: none;
+}
+
